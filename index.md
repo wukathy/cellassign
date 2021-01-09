@@ -1,12 +1,51 @@
-## Welcome to GitHub Pages
+## CellAssign Code Walkthrough
 
-You can use the [editor on GitHub](https://github.com/wukathy/cellassign/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
+This page walks through the code for [cellassign](https://github.com/Irrationone/cellassign/), a model that assigns single-cell RNA-seq data to known cell types. Information about known marker cell types is provided as input to the model in the form of a binary marker gene by cell-type matrix. 
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+### cellassign.R
 
-### Markdown
+cellassign takes in the following parameters:
+- `exprs_obj`: Either a matrix representing gene expression counts or a \code{SummarizedExperiment}
+- `marker_gene_info`: Information relating marker genes to cell types
+- `s`: Numeric vector of cell size factors
+- `min_delta`: The minimum log fold change a marker gene must be over-expressed by in its cell type
+- `X`: Numeric matrix of external covariates
+- `B`: Number of bases to use for RBF dispersion function
+- `shrinkage`: Boolean - should the delta parameters have hierarchical shrinkage?
+- `n_batches`: Number of data subsample batches to use in inference
+- `dirichlet_concentration`: Dirichlet concentration parameter for cell type abundances
+- `rel_tol_adam`: The change in Q function value (in pct) below which each optimization round is considered converged
+- `rel_tol_em`: The change in log marginal likelihood value (in pct) below which the EM algorithm is considered converged
+- `max_iter_adam`: Maximum number of ADAM iterations to perform in each M-step
+- `max_iter_em`: Maximum number of EM iterations to perform
+- `learning rate`: Learning rate of ADAM optimization
+- `verbose`: Boolean - should running info be printed?
+- `sce_assay`: The assay from teh input \code{SummarizedExperiment} to use: this assay should always represent raw counts
+- `return_SCE`: Boolean - should a SingleCellExperiment be returned with the cell type annotations added?
+- `num_runs`: Number of EM optimizations to perform (the one with the maximum log-marginal likelihood value will be used as the final).
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+Initialize the following variables for inference.
+Variable      | What it is | What it represents
+| ----------- | ----------- | ----------- |
+| rho | matrix from `marker_gene_info` | Binary gene by cell type matrix (where a 1 indicates that a gene is a marker for a cell type, and 0 otherwise)
+| Y | expression matrix from `exprs_obj` | Expression matrix of gene expression counts
+| N      | # of rows in `Y`       | Number of cells
+| X   | `X` matrix       | Cleaned covariate matrix
+| G   | # cols in `Y`        | Number of genes
+| C   | # of cols in `rho`        | Number of cell types
+| P   | # of cols in `X`        | Number of covariates
+
+Then compute size factors for each cell using `scran::computeSumFactors(t(Y))` and assign to `s`. Call `inference_tensorflow`.
+
+### inference_tensorflow.R
+
+inference_tensorflow takes in the following parameters:
+- `Y`: initialized to shape *(null, G)*
+- `rho`: initialized to shape *(null, C)*
+- `s`: initialized to shape *(null)*
+- `X`: initialized to shape *(null, P)*
+- `G`,`C`,`N`,`P`, `B`, `shrinkage`, `verbose`, `n_batches`, `rel_tol_adam`, `rel_tol_em`, `max_iter_adam`, `max_iter_em`, `learning_rate`, `random_seed`, `min_delta`, `dirichlet_concentration`, `threads`
+
 
 ```markdown
 Syntax highlighted code block
