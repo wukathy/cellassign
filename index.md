@@ -25,12 +25,12 @@ cellassign takes in the following parameters:
 - `num_runs`: Number of EM optimizations to perform (the one with the maximum log-marginal likelihood value will be used as the final).
 
 Initialize the following variables for inference.
-Variable      | What it is | What it represents
+Variable      | Initialize to | What it represents
 | ----------- | ----------- | ----------- |
 | rho | matrix from `marker_gene_info` | Binary gene by cell type matrix (where a 1 indicates that a gene is a marker for a cell type, and 0 otherwise)
 | Y | expression matrix from `exprs_obj` | Expression matrix of gene expression counts
 | N      | # of rows in `Y`       | Number of cells
-| X   | `X` matrix       | Cleaned covariate matrix
+| X   | covariate matrix from `X`       | Cleaned covariate matrix
 | G   | # cols in `Y`        | Number of genes
 | C   | # of cols in `rho`        | Number of cell types
 | P   | # of cols in `X`        | Number of covariates
@@ -46,6 +46,23 @@ inference_tensorflow takes in the following parameters:
 - `X`: initialized to shape *(null, P)*
 - `G`,`C`,`N`,`P`, `B`, `shrinkage`, `verbose`, `n_batches`, `rel_tol_adam`, `rel_tol_em`, `max_iter_adam`, `max_iter_em`, `learning_rate`, `random_seed`, `min_delta`, `dirichlet_concentration`, `threads`
 
+TODO: Not sure what this does
+```
+  # Added for splines
+  B <- as.integer(B)
+
+  basis_means_fixed <- seq(from = min(Y), to = max(Y), length.out = B)
+  basis_means <- tf$constant(basis_means_fixed, dtype = tf$float64)
+
+  b_init <- 2 * (basis_means_fixed[2] - basis_means_fixed[1])^2
+
+  LOWER_BOUND <- 1e-10
+ ```
+ If we specify a shrinkage prior, initialize `delta_log_mean` to 0 and `delta_log_variance` to 1.
+ 
+ Initialize `delta_log` to a tensor of shape (G,C) with values sampled from the uniform distribution going from -2 to 2. Clip values that are less than log(min_delta).
+ 
+ Initialize `beta`
 
 ```markdown
 Syntax highlighted code block
