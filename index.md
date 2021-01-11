@@ -54,6 +54,8 @@ inference_tensorflow takes in the following parameters:
 - Initialize `theta_logit` to a tensor of length C with values sampled from a normal distribution with mean = 0, stddev = 1.
 - Set spline variable `a` to a tensor of length B with 0's. Set spline variable `b` to a tensor of length B with -log(b_init). Set delta_log to entry_stop_gradients of delta_log. This stops the gradient for irrelevant entries of delta_log.
 
+**Let's find the model likelihood.**
+The likelihood uses a distribution given by NegativeBinomial(mu_ngc, phi_ngc).
 
 
 ```markdown
