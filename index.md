@@ -46,23 +46,15 @@ inference_tensorflow takes in the following parameters:
 - `X`: initialized to shape *(null, P)*
 - `G`,`C`,`N`,`P`, `B`, `shrinkage`, `verbose`, `n_batches`, `rel_tol_adam`, `rel_tol_em`, `max_iter_adam`, `max_iter_em`, `learning_rate`, `random_seed`, `min_delta`, `dirichlet_concentration`, `threads`
 
-TODO: Not sure what this does
-```
-  # Added for splines
-  B <- as.integer(B)
+**First, initialize some variables.**
+- Create a tensor `basis_means_fixed` of B elements, going from min(Y) to max(Y). Set `b_init` to 2 times the squared difference between the first and second elements of `basis_means_fixed`.
+- If we specify a shrinkage prior, initialize `delta_log_mean` to 0 and `delta_log_variance` to 1.
+ - Initialize `delta_log` to a tensor of shape (G,C) with values sampled from the uniform distribution going from -2 to 2. Clip values that are less than log(min_delta).
+ - Initialize `beta_0_init` to scaled column means of Y. Set `beta_init` to a matrix of shape (G, P-1) with the elements of `beta_0_init`. Set `beta` to a tensor of `beta_init`.
+- Initialize `theta_logit` to a tensor of length C with values sampled from a normal distribution with mean = 0, stddev = 1.
+- Set spline variable `a` to a tensor of length B with 0's. Set spline variable `b` to a tensor of length B with -log(b_init). Set delta_log to entry_stop_gradients of delta_log. This stops the gradient for irrelevant entries of delta_log.
 
-  basis_means_fixed <- seq(from = min(Y), to = max(Y), length.out = B)
-  basis_means <- tf$constant(basis_means_fixed, dtype = tf$float64)
 
-  b_init <- 2 * (basis_means_fixed[2] - basis_means_fixed[1])^2
-
-  LOWER_BOUND <- 1e-10
- ```
- If we specify a shrinkage prior, initialize `delta_log_mean` to 0 and `delta_log_variance` to 1.
- 
- Initialize `delta_log` to a tensor of shape (G,C) with values sampled from the uniform distribution going from -2 to 2. Clip values that are less than log(min_delta).
- 
- Initialize `beta`
 
 ```markdown
 Syntax highlighted code block
